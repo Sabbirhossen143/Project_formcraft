@@ -4,7 +4,8 @@
 
 FormCraft is a full-stack, chatbot-powered form builder that transforms traditional forms into interactive conversations. Create and customize forms, publish shareable URLs, embed a floating chatbot widget on external websites, and manage submissions through a dedicated dashboard.
 
-Built with **Next.js, React, TypeScript, Tailwind CSS, and Supabase**, FormCraft provides a modern foundation for conversational data collection.
+**Live Demo:** https://project-formcraft.vercel.app/  
+**GitHub Repository:** https://github.com/Sabbirhossen143/Project_formcraft
 
 ![Next.js](https://img.shields.io/badge/Next.js-App_Router-black?logo=next.js)
 ![React](https://img.shields.io/badge/React-UI-61DAFB?logo=react&logoColor=black)
@@ -29,8 +30,7 @@ Built with **Next.js, React, TypeScript, Tailwind CSS, and Supabase**, FormCraft
 - [Database Architecture](#database-architecture)
 - [Security](#security)
 - [Production Deployment](#production-deployment)
-- [Production Hardening](#production-hardening)
-- [Project Status](#project-status)
+- [Future Improvements](#future-improvements)
 
 ---
 
@@ -56,9 +56,9 @@ The project is designed as a full-stack MVP and can serve as a foundation for fu
 - Create new forms and edit existing forms.
 - Configure a form title and optional introduction.
 - Support four question types:
-  - **Short text** — collect written answers.
+  - **Short Text** — collect written answers.
   - **Email** — collect email addresses.
-  - **Multiple choice** — let visitors choose from predefined options.
+  - **Multiple Choice** — let visitors choose from predefined options.
   - **Yes / No** — collect binary responses.
 - Mark questions as required.
 - Add and remove multiple-choice options.
@@ -97,7 +97,7 @@ Customize the chatbot experience to match your form or brand:
 - Supabase authentication.
 - PostgreSQL Row Level Security (RLS).
 - Ownership checks for form management.
-- Submission policies designed to prevent anonymous access to private responses.
+- Database policies for access control.
 
 ---
 
@@ -114,7 +114,7 @@ Customize the chatbot experience to match your form or brand:
 | Supabase RLS | Database access control |
 | Zod | Server-side input validation |
 | Lucide React | Interface icons |
-| Vercel | Recommended deployment platform |
+| Vercel | Application deployment |
 
 **Runtime requirement:** Node.js 20 or later.
 
@@ -128,16 +128,13 @@ Before setting up the project, make sure you have:
 - npm
 - A Supabase account and project
 - Git
-- A GitHub repository, if you plan to deploy through Vercel
 
 ### 1. Clone the Repository
 
 ```bash
-git clone YOUR_REPOSITORY_URL
-cd YOUR_PROJECT_DIRECTORY
+git clone https://github.com/Sabbirhossen143/Project_formcraft.git
+cd Project_formcraft
 ```
-
-Replace the placeholders with your actual repository URL and directory name.
 
 ### 2. Install Dependencies
 
@@ -147,42 +144,48 @@ npm install
 
 ### 3. Configure Environment Variables
 
-Create a `.env.local` file in the project root. You can start by copying `.env.example` if it exists.
+Create a `.env.local` file in the project root.
+
+Add the environment variables required by your application:
 
 ```dotenv
 NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=YOUR_SUPABASE_PUBLISHABLE_KEY
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-Replace the placeholder values with your actual Supabase project credentials.
+Replace the placeholder values with your actual Supabase project details. Use the key names required by the corresponding files in your project.
 
 | Variable | Description |
 |---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase publishable/anon client key used by the application |
-| `NEXT_PUBLIC_SITE_URL` | Base URL used to construct application and public form links |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public anon key used by the middleware, if retained in the code |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Publishable key used by the Supabase server client |
+| `NEXT_PUBLIC_SITE_URL` | Base URL for the application and public form links |
 
-**Security note:** Never expose a Supabase `service_role` key in a `NEXT_PUBLIC_` variable or commit secrets to Git.
+**Important:** If you standardize on one Supabase public key variable in your code, remove the unused variable from this example. Never expose a Supabase service-role or secret key in a `NEXT_PUBLIC_` variable. Never commit `.env.local` to GitHub.
 
-### 4. Configure the Database
+## Supabase Setup
 
-1. Open your Supabase project.
-2. Navigate to **SQL Editor**.
-3. Open the project's `supabase-schema.sql` file.
-4. Execute the complete SQL script.
-5. Confirm that the required tables and policies were created successfully.
+1. Create a project in the Supabase Dashboard.
+2. Copy the project URL and the appropriate public client key.
+3. Add the required environment variables to `.env.local`.
+4. Open your Supabase project's **SQL Editor**.
+5. Open the `supabase-schema.sql` file in this repository.
+6. Execute the complete SQL script.
+7. Confirm that the `forms` and `submissions` tables and their Row Level Security policies have been created.
 
-### 5. Configure Supabase Authentication
+### Configure Authentication
 
 In Supabase, navigate to **Authentication → URL Configuration**.
 
-For local development, configure:
+For local development, use:
 
 - **Site URL:** `http://localhost:3000`
-- **Redirect URL:** `http://localhost:3000/auth/callback`, if required by your email-confirmation flow.
+- Add the required local redirect URLs for your authentication flow.
 
-Use the appropriate production URLs when deploying the application.
+For production, configure your deployed domain and the appropriate redirect URLs.
 
 ## Running Locally
 
@@ -204,6 +207,20 @@ Then:
 6. Open the public form URL and test the conversation.
 7. Review submitted answers in the dashboard.
 
+### Production Build
+
+Check the production build before deploying:
+
+```bash
+npm run build
+```
+
+Run the production server locally:
+
+```bash
+npm start
+```
+
 ---
 
 ## Creating and Publishing a Form
@@ -222,7 +239,7 @@ You can unpublish a form when you no longer want it to accept public submissions
 
 ## Embedding the Chatbot
 
-FormCraft includes a JavaScript embed loader at:
+FormCraft includes a JavaScript embed loader:
 
 ```text
 /formcraft-embed.js
@@ -266,24 +283,16 @@ For production, use your deployed HTTPS origin for both URL attributes.
 
 ## API Reference
 
-FormCraft exposes the following application routes.
+The application includes the following API routes:
 
 | Method | Endpoint | Purpose |
 |---|---|---|
 | `POST` | `/api/forms` | Create a form |
 | `PATCH` | `/api/forms/:id` | Update an owned form |
-| `DELETE` | `/api/forms/:id` | Delete an owned form and its submissions |
+| `DELETE` | `/api/forms/:id` | Delete an owned form |
 | `POST` | `/api/forms/:id/publish` | Publish or unpublish a form |
 | `GET` | `/api/public/forms/:slug` | Retrieve published form metadata |
 | `POST` | `/api/public/forms/:slug/responses` | Validate and save a public submission |
-
-### API Behavior
-
-- Form creation and updates use the authenticated user's identity.
-- Form management endpoints check ownership.
-- Public form retrieval is intended for published forms.
-- Public submissions are validated on the server before being stored.
-- Database policies provide an additional access-control layer.
 
 The exact request and response schemas are defined by the application's route handlers and validation logic.
 
@@ -297,13 +306,13 @@ Stores form definitions and publishing information.
 
 | Field | Purpose |
 |---|---|
-| Owner / user ID | Associates the form with its creator |
-| Title | Form name |
-| Description | Optional introductory text |
-| Slug | Unique public identifier |
-| Questions | JSON representation of question definitions |
-| Theme | JSON representation of chatbot settings |
-| Publication state | Indicates whether the form is published |
+| `user_id` | Associates the form with its creator |
+| `title` | Form name |
+| `description` | Optional introductory text |
+| `slug` | Unique public identifier |
+| `questions` | JSON representation of question definitions |
+| `theme` | JSON representation of chatbot settings |
+| `is_published` | Indicates whether the form is published |
 | Timestamps | Creation and update tracking |
 
 ### `submissions`
@@ -312,24 +321,21 @@ Stores responses collected from published forms.
 
 | Field | Purpose |
 |---|---|
-| Form ID | Associates the submission with a form |
-| Answers | JSON representation of submitted answers |
-| Created timestamp | Records when the response was submitted |
+| `form_id` | Associates the submission with a form |
+| `answers` | JSON representation of submitted answers |
+| `created_at` | Records when the response was submitted |
 
-Question and theme JSON are validated through the server API using Zod. Supabase RLS policies help enforce access rules for owners and public submissions.
-
-The authoritative schema is the project's `supabase-schema.sql` file.
+The authoritative database schema is `supabase-schema.sql`.
 
 ## Security
 
-Security controls included in the MVP:
+Security controls in the MVP include:
 
 - Supabase authentication for user accounts.
 - Server-side validation using Zod.
 - Form ownership checks.
 - Row Level Security policies for database access.
-- Public submissions restricted to published forms.
-- No intended anonymous read access to private submission records.
+- Public submission handling for published forms.
 
 ### Handling Credentials
 
@@ -337,59 +343,43 @@ Security controls included in the MVP:
 - Never commit `.env.local`.
 - Never expose a service-role key through browser-visible environment variables.
 - Use the least-privileged credentials needed for each operation.
-
-Review the database policies before changing access rules or introducing new endpoints.
+- Review database policies before changing access rules or adding endpoints.
 
 ---
 
 ## Production Deployment
 
-FormCraft can be deployed to Vercel.
+FormCraft is deployed at:
 
-### 1. Push the Project to GitHub
+**Live Application:** https://project-formcraft.vercel.app/
 
-Commit your latest changes and push them to your repository.
+### Deploy with Vercel
 
-```bash
-git add .
-git commit -m "Prepare FormCraft for deployment"
-git push
-```
-
-Make sure secrets and local environment files are excluded from Git.
-
-### 2. Import the Repository into Vercel
-
-1. Open the Vercel dashboard.
-2. Import your GitHub repository.
-3. Confirm the framework is detected as Next.js.
-4. Configure the required environment variables.
-
-### 3. Configure Production Environment Variables
-
-In Vercel, add:
+1. Push the project to GitHub.
+2. Open the [Vercel Dashboard](https://vercel.com/dashboard).
+3. Import the repository: `Sabbirhossen143/Project_formcraft`.
+4. Confirm that Vercel detects Next.js.
+5. Add the required environment variables under **Project Settings → Environment Variables**.
+6. Set the production site URL:
 
 ```dotenv
-NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
-NEXT_PUBLIC_SITE_URL=https://YOUR_DEPLOYED_DOMAIN
+NEXT_PUBLIC_SITE_URL=https://project-formcraft.vercel.app
 ```
 
-Replace `YOUR_DEPLOYED_DOMAIN` with your actual deployed origin, without adding a path.
+7. Set the Supabase project URL and the public key variables required by your code.
+8. Deploy or redeploy the application.
 
-Set the variables for the appropriate deployment environments, then deploy or redeploy the application.
-
-### 4. Update Supabase Authentication URLs
+### Update Supabase Authentication URLs
 
 In Supabase **Authentication → URL Configuration**:
 
-- Set the Site URL to your production domain.
-- Add the production authentication callback URL to Redirect URLs if your authentication flow requires it.
+- Set the Site URL to `https://project-formcraft.vercel.app` if this is your primary production domain.
+- Add any required production authentication redirect URLs.
 - Keep local development URLs if you still need them.
 
-### 5. Verify the Live Application
+### Verify the Live Application
 
-After deployment, test the following:
+After deployment, test:
 
 - Landing page and navigation.
 - Signup and login.
@@ -403,30 +393,26 @@ After deployment, test the following:
 
 A successful deployment does not by itself guarantee that authentication redirects, database policies, or embed URLs are configured correctly.
 
-## Production Hardening
+## Future Improvements
 
-Before accepting significant public traffic or sensitive information, consider adding:
+Potential enhancements for future versions include:
 
-- **Rate limiting:** Protect public submission endpoints against abuse.
-- **Bot protection:** Add CAPTCHA or a provider such as Cloudflare Turnstile.
-- **Retention controls:** Define how long submissions are stored.
-- **Export and deletion workflows:** Give authorized users appropriate data-management options.
-- **Audit logging:** Track important administrative actions.
-- **Content Security Policy:** Restrict resources and embedding behavior where appropriate.
-- **Authentication hardening:** Configure email confirmation and a strong password policy.
-- **Monitoring:** Add error reporting and production health checks.
-- **Privacy documentation:** Explain what information is collected and how it is handled.
+- Rate limiting for public submission endpoints.
+- CAPTCHA or bot protection.
+- Response exports and improved data-management tools.
+- Advanced chatbot themes.
+- Team workspaces and collaboration.
+- Analytics and reporting.
+- Audit logging, monitoring, and additional production safeguards.
+- Privacy and data-retention controls.
 
-These are recommended future improvements and should not be interpreted as features already implemented in the MVP.
-
-## Project Status
-
-**Current scope:** Full-stack MVP.
-
-Implemented capabilities include conversational form creation, publishing, chatbot embedding, authentication, and response management.
-
-Potential future enhancements include analytics, response exports, advanced themes, team workspaces, additional question types, spam protection, and deeper operational monitoring.
+These are potential improvements, not claims that all such features are already implemented.
 
 ---
+
+## Project Links
+
+- **Live Demo:** https://project-formcraft.vercel.app/
+- **GitHub Repository:** https://github.com/Sabbirhossen143/Project_formcraft
 
 **FormCraft — Turn forms into conversations.**
