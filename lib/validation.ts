@@ -1,0 +1,4 @@
+import { z } from 'zod';
+export const questionSchema = z.object({ id:z.string().min(1).max(80), type:z.enum(['text','email','multiple_choice','yes_no']), label:z.string().trim().min(1).max(240), required:z.boolean(), options:z.array(z.string().trim().min(1).max(120)).max(20).optional() }).superRefine((q,ctx)=>{ if(q.type==='multiple_choice' && (!q.options || q.options.length<2)) ctx.addIssue({code:'custom',path:['options'],message:'Multiple choice questions need at least two options.'}); });
+export const formInputSchema = z.object({ title:z.string().trim().min(1).max(120), description:z.string().max(500).default(''), questions:z.array(questionSchema).min(1).max(50), theme:z.object({primaryColor:z.string().regex(/^#[0-9a-fA-F]{6}$/),welcomeMessage:z.string().trim().min(1).max(240),completionMessage:z.string().trim().min(1).max(240)}) });
+export const submissionSchema = z.object({ answers:z.record(z.string().max(2400)) });
